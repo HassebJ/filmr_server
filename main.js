@@ -5,6 +5,7 @@ var express = require('express');
 var fs = require('fs');
 var request = require('request');
 var cheerio = require('cheerio');
+var async = require('async');
 
 require('./movies');
 require('./genres');
@@ -38,6 +39,16 @@ function sleep(time) {
     while(new Date().getTime() < stop + time) {
         ;
     }
+}
+
+function checkempty(str){
+    if(typeof(str) !== "undefined") {
+        if (str.length > 0 && str !== null) {
+            return true;
+        }
+    }
+    return false;
+
 }
 
 function capitalizeFirstLetter(string) {
@@ -77,37 +88,148 @@ function combineParams(arr){
 }
 
 app.get('/getRecommendation', function(req, res){
-    console.log(parseCSV(req.query.genres));
-    var csvArr = parseCSV(req.query.genres);
-    Genre.find({name:{$in: csvArr } }, function (err, genres) {
-        console.log(genres);
-        var genresId = genres.map(function (genre){
-            return genre.id;
-        });
-        console.log(genresId.toString());
 
-        tmdb.searchPerson({query:req.query.actor},function(err, resp){
-            var actorId = resp.results[0].id;
-            console.log(resp.results[0].id);
-
-            tmdb.searchKeyword({query:req.query.keyword}, function(err, resp){
-                var keywordId = resp.results[0].id;
-                console.log(resp);
-                console.log("release_date.gte:"+ req.query.era_start + " release_date.lte :" +  req.query.era_end+ " with_people:" + actorId+ " with_genres:" + genresId.toString());
-                tmdb.discoverMovie({"release_date.gte": req.query.era_start, "release_date.lte": req.query.era_end, "with_people":actorId, "with_genres":genresId.toString(), "with_keyword":keywordId }, function(err, resp){
-//                    console /.log(resp);
-                    tmdb.movieInfo({id: resp.results[0].id}, function(err, movieInfo){
-                        console.log(movieInfo);
-                        movieInfo.poster_path = 'http://image.tmdb.org/t/p/original'+movieInfo.poster_path;
-                        res.json(movieInfo);
+    async.parallel({
+            getGenres: function (callback) {
+                if(checkempty(req.query.genres) === true){
+                    var csvArr = parseCSV(req.query.genres);
+                    //                console.log(csvArr);
+                    Genre.find({name: {$in: csvArr } }, function (err, genres) {
+                        var genresId = genres.map(function (genre) {
+                            return genre.id;
+                        });
+                        callback(null, genresId.toString());
                     });
+                }
+                else{
+                    callback(null, '');
+                }
+
+            },
+            getActor: function (outercallback) {
+                if(checkempty(req.query.actors) === true) {
+                    var actors = parseCSV(req.query.actors);
+                    //                console.log(actors);
+                    var actorsArr = [];
+
+                    async.each(actors, function (actor, innercallback) {
+                        tmdb.searchPerson({query: actor }, function (err, resp) {
+                            actorsArr.push(resp.results[0]);
+                            innercallback();
+                        });
+
+                    }, function (err) {
+                        // if any of the file processing produced an error, err would equal that error
+                        if (err) {
+                            // One of the iterations produced an error.
+                            // All processing will now stop.
+                            console.log('An actor failed to process:' + err);
+                        } else {
+                            //                        console.log(JSON.stringify(actorsArr, null, 4));
+                            var actorsId = actorsArr.map(function (actor) {
+                                return actor.id;
+                            });
+                            //                                                console.log(actorsId.toString());
+
+                            outercallback(null, actorsId.toString());
+                            //                        console.log(JSON.stringify(actorsId));
+                        }
+                    });
+                }
+                else{
+                    outercallback(null, '');
+                }
+
+
+            },
+            getKeywords: function (outercallback) {
+
+                if(checkempty(req.query.actors) === true) {
+                    var keywords = parseCSV(req.query.keyword);
+                    var keywordsArr = [];
+
+                    async.each(keywords, function (keyword, innercallback) {
+                        tmdb.searchKeyword({query: keyword }, function (err, resp) {
+                            keywordsArr.push(resp.results[0]);
+                            console.log(JSON.stringify(resp, null, 4));
+
+                            innercallback();
+                        });
+
+                    }, function (err) {
+                        // if any of the file processing produced an error, err would equal that error
+                        if (err) {
+                            // One of the iterations produced an error.
+                            // All processing will now stop.
+                            console.log('An actor failed to process:' + err);
+                        } else {
+
+                            var keywordsId = keywordsArr.map(function (keyword) {
+                                return keyword.id;
+                            });
+//                            console.log(keywordsId.toString());
+
+                            outercallback(null, keywordsId.toString());
+//                        console.log(JSON.stringify(actorsId));
+                        }
+                    });
+                }
+                else{
+                    outercallback(null, '');
+                }
+
+            }
+
+
+        },
+        function(err, results) {
+            console.log(results);
+                            console.log("release_date.gte:"+ req.query.era_start + " release_date.lte :" +  req.query.era_end+ " with_people:" + results.getActor + " with_genres:" + results.getGenres + "with_keyword:" + results.getKeywords);
+                tmdb.discoverMovie({"release_date.gte": req.query.era_start, "release_date.lte": req.query.era_end, "with_people":results.getActor, "with_genres":results.getGenres, "with_keyword":results.getKeywords}, function(err, resp){
+//                    tmdb.movieInfo({id: resp.results[0].id}, function(err, movieInfo){
+//                        console.log(movieInfo);
+//                        movieInfo.poster_path = 'http://image.tmdb.org/t/p/original'+movieInfo.poster_path;
+//                        res.json(movieInfo);
+//                    });
+                    res.json(resp);
 
                 });
-            });
-        });
 
+            // results is now equals to: {one: 1, two: 2}
     });
 
+
+//    console.log(parseCSV(req.query.genres));
+//    var csvArr = parseCSV(req.query.genres);
+//    Genre.find({name:{$in: csvArr } }, function (err, genres) {
+//        console.log(genres);
+//        var genresId = genres.map(function (genre){
+//            return genre.id;
+//        });
+//        console.log(genresId.toString());
+//
+//        tmdb.searchPerson({query:req.query.actor},function(err, resp){
+//            var actorId = resp.results[0].id;
+//            console.log(resp.results[0].id);
+//
+//            tmdb.searchKeyword({query:req.query.keyword}, function(err, resp){
+//                var keywordId = resp.results[0].id;
+//                console.log(resp);
+//                console.log("release_date.gte:"+ req.query.era_start + " release_date.lte :" +  req.query.era_end+ " with_people:" + actorId+ " with_genres:" + genresId.toString());
+//                tmdb.discoverMovie({"release_date.gte": req.query.era_start, "release_date.lte": req.query.era_end, "with_people":actorId, "with_genres":genresId.toString(), "with_keyword":keywordId }, function(err, resp){
+////                    console /.log(resp);
+//                    tmdb.movieInfo({id: resp.results[0].id}, function(err, movieInfo){
+//                        console.log(movieInfo);
+//                        movieInfo.poster_path = 'http://image.tmdb.org/t/p/original'+movieInfo.poster_path;
+//                        res.json(movieInfo);
+//                    });
+//
+//                });
+//            });
+//        });
+//
+//    });
+//    res.send(200);
 
 });
 
