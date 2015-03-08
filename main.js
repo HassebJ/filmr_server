@@ -170,7 +170,8 @@ app.get('/getRecommendation', function(req, res){
 //                            console.log(keywordsId.toString());
 
                             outercallback(null, keywordsId.toString());
-//                        console.log(JSON.stringify(actorsId));
+//                        conso
+// 2le.log(JSON.stringify(actorsId));
                         }
                     });
                 }
@@ -198,40 +199,9 @@ app.get('/getRecommendation', function(req, res){
             // results is now equals to: {one: 1, two: 2}
     });
 
-
-//    console.log(parseCSV(req.query.genres));
-//    var csvArr = parseCSV(req.query.genres);
-//    Genre.find({name:{$in: csvArr } }, function (err, genres) {
-//        console.log(genres);
-//        var genresId = genres.map(function (genre){
-//            return genre.id;
-//        });
-//        console.log(genresId.toString());
-//
-//        tmdb.searchPerson({query:req.query.actor},function(err, resp){
-//            var actorId = resp.results[0].id;
-//            console.log(resp.results[0].id);
-//
-//            tmdb.searchKeyword({query:req.query.keyword}, function(err, resp){
-//                var keywordId = resp.results[0].id;
-//                console.log(resp);
-//                console.log("release_date.gte:"+ req.query.era_start + " release_date.lte :" +  req.query.era_end+ " with_people:" + actorId+ " with_genres:" + genresId.toString());
-//                tmdb.discoverMovie({"release_date.gte": req.query.era_start, "release_date.lte": req.query.era_end, "with_people":actorId, "with_genres":genresId.toString(), "with_keyword":keywordId }, function(err, resp){
-////                    console /.log(resp);
-//                    tmdb.movieInfo({id: resp.results[0].id}, function(err, movieInfo){
-//                        console.log(movieInfo);
-//                        movieInfo.poster_path = 'http://image.tmdb.org/t/p/original'+movieInfo.poster_path;
-//                        res.json(movieInfo);
-//                    });
-//
-//                });
-//            });
-//        });
-//
-//    });
-//    res.send(200);
-
 });
+
+app.get('/get')
 
 app.get('/getGenres', function(req, res){
     tmdb.genreList(function(err, resp){
