@@ -10,6 +10,7 @@
     "cheerio"    : "latest",
       "moviedb" : "latest",
       "mongoose" : "latest",
-      "async": "latest"
+      "async": "latest",
+      "bluebird": "*"
   }
 }

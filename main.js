@@ -6,13 +6,16 @@ var fs = require('fs');
 var request = require('request');
 var cheerio = require('cheerio');
 var async = require('async');
+var Promise = require ('bluebird');
+
 
 require('./movies');
 require('./genres');
 var mongoose = require('mongoose');
+var Genre = Promise.promisifyAll(mongoose.model('Genre'));
 var Movie = mongoose.model('Movie');
-var Genre = mongoose.model('Genre');
-var tmdb = require('moviedb')('ac16918a1af4a39ca7b490be17f2ea78');
+//var Genre = mongoose.model('Genre');
+var tmdb = Promise.promisifyAll(require('moviedb')('ac16918a1af4a39ca7b490be17f2ea78'));
 var mongodb = mongoose.connect('mongodb://localhost/moviedb');
 var app = express();
 
@@ -87,18 +90,58 @@ function combineParams(arr){
 
 }
 
+function getGenresId(genres){
+    var genresArr = parseCSV(genres);
+    return Genre.findAsync({name: {$in: genresArr } }).then(function (genres){
+        var genresId = genres.map(function (genre) {
+            return genre.id;
+        });
+        return genresId.toString();
+
+    });
+
+}
+
+function getActorsId(actors){
+    var actorsArr = parseCSV(actors);
+//    var actorsArr = [];
+
+   return Promise.map(actorsArr, function(actor) {
+        return tmdb.searchPersonAsync({query: actor }).then(function (actorData){
+//            console.log(actorData);
+            return actorData.results[0];
+        });
+    }).reduce(function(a, b){
+        return a.concat(b.id);
+    },[]).then(function(actorsIds){
+        return actorsIds.toString();
+    });
+}
+
+function getKeywordsId(keywords){
+    var keywordsArr = parseCSV(keywords);
+
+    return Promise.map(keywordsArr, function(keyword) {
+        return tmdb.searchKeywordAsync({query: keyword }).then(function (keywordData){
+            return keywordData.results[0];
+        });
+    }).reduce(function(a, b){
+        return a.concat(b.id);
+    },[]).then(function(keywordIds){
+        return keywordIds.toString();
+    });
+
+}
+
 app.get('/getRecommendation', function(req, res){
 
     async.parallel({
             getGenres: function (callback) {
                 if(checkempty(req.query.genres) === true){
-                    var csvArr = parseCSV(req.query.genres);
-                    //                console.log(csvArr);
-                    Genre.find({name: {$in: csvArr } }, function (err, genres) {
-                        var genresId = genres.map(function (genre) {
-                            return genre.id;
-                        });
-                        callback(null, genresId.toString());
+                    getGenresId(req.query.genres).done(function(val){
+                        callback(null, val);
+                    }, function (err){
+                        console.log(err);
                     });
                 }
                 else{
@@ -108,32 +151,10 @@ app.get('/getRecommendation', function(req, res){
             },
             getActor: function (outercallback) {
                 if(checkempty(req.query.actors) === true) {
-                    var actors = parseCSV(req.query.actors);
-                    //                console.log(actors);
-                    var actorsArr = [];
-
-                    async.each(actors, function (actor, innercallback) {
-                        tmdb.searchPerson({query: actor }, function (err, resp) {
-                            actorsArr.push(resp.results[0]);
-                            innercallback();
-                        });
-
-                    }, function (err) {
-                        // if any of the file processing produced an error, err would equal that error
-                        if (err) {
-                            // One of the iterations produced an error.
-                            // All processing will now stop.
-                            console.log('An actor failed to process:' + err);
-                        } else {
-                            //                        console.log(JSON.stringify(actorsArr, null, 4));
-                            var actorsId = actorsArr.map(function (actor) {
-                                return actor.id;
-                            });
-                            //                                                console.log(actorsId.toString());
-
-                            outercallback(null, actorsId.toString());
-                            //                        console.log(JSON.stringify(actorsId));
-                        }
+                    getActorsId(req.query.actors).done(function(val){
+                        outercallback(null, val);
+                    }, function (err){
+                        console.log(err);
                     });
                 }
                 else{
@@ -144,35 +165,11 @@ app.get('/getRecommendation', function(req, res){
             },
             getKeywords: function (outercallback) {
 
-                if(checkempty(req.query.actors) === true) {
-                    var keywords = parseCSV(req.query.keyword);
-                    var keywordsArr = [];
-
-                    async.each(keywords, function (keyword, innercallback) {
-                        tmdb.searchKeyword({query: keyword }, function (err, resp) {
-                            keywordsArr.push(resp.results[0]);
-                            console.log(JSON.stringify(resp, null, 4));
-
-                            innercallback();
-                        });
-
-                    }, function (err) {
-                        // if any of the file processing produced an error, err would equal that error
-                        if (err) {
-                            // One of the iterations produced an error.
-                            // All processing will now stop.
-                            console.log('An actor failed to process:' + err);
-                        } else {
-
-                            var keywordsId = keywordsArr.map(function (keyword) {
-                                return keyword.id;
-                            });
-//                            console.log(keywordsId.toString());
-
-                            outercallback(null, keywordsId.toString());
-//                        conso
-// 2le.log(JSON.stringify(actorsId));
-                        }
+                if(checkempty(req.query.keyword) === true) {
+                    getKeywordsId(req.query.keyword).done(function(val){
+                        outercallback(null, val);
+                    }, function (err){
+                        console.log(err);
                     });
                 }
                 else{
@@ -201,7 +198,7 @@ app.get('/getRecommendation', function(req, res){
 
 });
 
-app.get('/get')
+//app.get('/get')
 
 app.get('/getGenres', function(req, res){
     tmdb.genreList(function(err, resp){
