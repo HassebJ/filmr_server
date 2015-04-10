@@ -9,8 +9,8 @@ var async = require('async');
 var Promise = require ('bluebird');
 
 
-require('./movies');
-require('./genres');
+require('./models/movies');
+require('./models/genres');
 var mongoose = require('mongoose');
 var Genre = Promise.promisifyAll(mongoose.model('Genre'));
 var Movie = mongoose.model('Movie');
@@ -220,6 +220,8 @@ app.get('/getGenres', function(req, res){
 
 
 });
+
+
 
 var server = app.listen(3000, function () {
 

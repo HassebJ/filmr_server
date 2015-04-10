@@ -19,4 +19,4 @@ var KeywordsSchema = new Schema({
 });
 
 
-mongoose.model('Keyword', keywordSchema);
+mongoose.model('Keyword', KeywordsSchema);

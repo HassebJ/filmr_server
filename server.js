@@ -3,7 +3,7 @@ var fs = require('fs');
 var request = require('request');
 var cheerio = require('cheerio');
 
-require('./movies');
+require('./models/movies');
 var mongoose = require('mongoose');
 var Movie = mongoose.model('Movie');
 var db = require('moviedb')('ac16918a1af4a39ca7b490be17f2ea78');
