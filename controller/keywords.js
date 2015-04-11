@@ -78,7 +78,17 @@ var getKeywords = function() {
                                         dountilcallback();
                                     },
                                     function () {
-                                        return !error;
+                                        if (error){
+                                            console.log('waiting for 10 seconds');
+                                            setTimeout(function(){
+                                                return error;
+
+                                            }, 10000);
+
+                                        }
+                                        else{
+                                            return !error;
+                                        }
                                     },
                                     function (err) {
                                         // 5 seconds have passed
@@ -89,11 +99,11 @@ var getKeywords = function() {
 
                             },
                             function (err) {
-                                console.log('waiting for 10 seconds');
-                                setTimeout(function(){
+                                //console.log('waiting for 10 seconds');
+                                //setTimeout(function(){
                                     eachcallback();
 
-                                }, 10000);
+                                //}, 10000);
 
                             }
                         );
