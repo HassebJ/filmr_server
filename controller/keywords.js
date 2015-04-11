@@ -12,8 +12,6 @@ var app = require('express')();
 var getKeywords = function() {
 //app.get('/getKeywords',function(req, res){
     var total = 0;
-
-
     async.eachSeries("abcdefghijklmnopqrstuvwxyz".split(""), function (char, eachcallback) {
         var outer_error;
         async.doUntil(
@@ -22,13 +20,13 @@ var getKeywords = function() {
                 tmdb.searchKeyword({query: char }, function (err, outerresp) {
                     outer_error = err;
                     if (err) {
-                        console.log(err);
+                        console.log('err at initial search: ' +err );
                     } else {
 
                         var total_pages = outerresp.total_pages;
                         total += outerresp.total_results;
                         var page = 2;
-                        console.log(outerresp.total_results + ' : ' + total);
+                        console.log(char + ' : ' + outerresp.total_results + ' : ' + total);
                         outerresp.results.forEach(function (keyword) {
                             var keywordObj = new Keyword();
                             keywordObj.id = keyword.id;
@@ -57,7 +55,7 @@ var getKeywords = function() {
                                         tmdb.searchKeyword({query: char, page: page }, function (err, resp) {
                                             error = err;
                                             if (err) {
-                                                console.log(err + ' : ' + char + ' : ' + page);
+                                                console.log('err at retrying' + char + ' : ' + page + ' : ' +err );
 
                                             } else {
                                                 resp.results.forEach(function (keyword) {
@@ -91,8 +89,12 @@ var getKeywords = function() {
 
                             },
                             function (err) {
-                                //                    if(!err)
-                                eachcallback();
+                                console.log('waiting for 10 seconds');
+                                setTimeout(function(){
+                                    eachcallback();
+
+                                }, 10000);
+
                             }
                         );
                     }
