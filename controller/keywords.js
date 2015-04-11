@@ -55,7 +55,7 @@ var getKeywords = function() {
                                         tmdb.searchKeyword({query: char, page: page }, function (err, resp) {
                                             error = err;
                                             if (err) {
-                                                console.log('err at retrying' + char + ' : ' + page + ' : ' +err );
+                                                console.log('err at retrying ' + char + ' : ' + page + ' : ' +err );
 
                                             } else {
                                                 resp.results.forEach(function (keyword) {
@@ -75,23 +75,22 @@ var getKeywords = function() {
 
 
                                         });
-                                        dountilcallback();
-                                    },
-                                    function () {
-                                        if (error){
+                                        if(page % 20 === 0){
                                             console.log('waiting for 10 seconds');
                                             setTimeout(function(){
                                                 return error;
 
                                             }, 10000);
-
                                         }
-                                        else{
+                                        dountilcallback();
+                                    },
+                                    function () {
                                             return !error;
-                                        }
                                     },
                                     function (err) {
-                                        // 5 seconds have passed
+                                        if (err)
+                                            console.log('dounitl err' + err);
+
                                         whilstcallback();
                                     }
                                 );
@@ -99,6 +98,8 @@ var getKeywords = function() {
 
                             },
                             function (err) {
+                                if (err)
+                                    console.log('dowhilst err' + err);
                                 //console.log('waiting for 10 seconds');
                                 //setTimeout(function(){
                                     eachcallback();
