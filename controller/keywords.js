@@ -78,11 +78,14 @@ var getKeywords = function() {
                                         if(page % 20 === 0){
                                             console.log('waiting for 10 seconds');
                                             setTimeout(function(){
-                                                return error;
+                                                dountilcallback();
 
                                             }, 10000);
                                         }
-                                        dountilcallback();
+                                        else{
+                                            dountilcallback();
+                                        }
+
                                     },
                                     function () {
                                             return !error;
