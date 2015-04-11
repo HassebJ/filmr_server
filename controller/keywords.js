@@ -75,16 +75,9 @@ var getKeywords = function() {
 
 
                                         });
-                                        if(page % 20 === 0){
-                                            console.log('waiting for 10 seconds');
-                                            setTimeout(function(){
-                                                dountilcallback();
 
-                                            }, 10000);
-                                        }
-                                        else{
                                             dountilcallback();
-                                        }
+
 
                                     },
                                     function () {
@@ -93,8 +86,18 @@ var getKeywords = function() {
                                     function (err) {
                                         if (err)
                                             console.log('dounitl err' + err);
+                                        if(page % 20 === 0){
+                                            console.log('waiting for 10 seconds');
+                                            setTimeout(function(){
+                                                whilstcallback();
 
-                                        whilstcallback();
+                                            }, 10000);
+                                        }
+                                        else{
+                                            whilstcallback();
+                                        }
+
+
                                     }
                                 );
 
