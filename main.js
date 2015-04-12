@@ -11,9 +11,11 @@ var Promise = require ('bluebird');
 
 require('./models/movies');
 require('./models/genres');
+require('./models/keywords');
 var mongoose = require('mongoose');
 var Genre = Promise.promisifyAll(mongoose.model('Genre'));
 var Movie = mongoose.model('Movie');
+var Keyword = mongoose.model('Keyword');
 //var Genre = mongoose.model('Genre');
 var tmdb = Promise.promisifyAll(require('moviedb')('ac16918a1af4a39ca7b490be17f2ea78'));
 var mongodb = mongoose.connect('mongodb://localhost/moviedb');
@@ -132,6 +134,36 @@ function getKeywordsId(keywords){
     });
 
 }
+
+app.get('/autocompleteKeywords', function(req, res){
+//    var regex = req.query.regex;
+    var regex = '(\\b'+ req.query.regex + ')\\w*';
+    console.log(regex);
+    Keyword.find({name: {$regex : regex, $options: 'ig'} }, function(err, keywords){
+        console.log(keywords);
+        if(err){
+            res.send(404);
+        }
+        res.json(keywords);
+    });
+
+
+});
+
+app.get('/autocompleteGenres', function(req, res){
+//    var regex = req.query.regex;
+    var regex = '(\\b'+ req.query.regex + ')\\w*';
+    console.log(regex);
+    Genre.find({name: {$regex : regex, $options: 'ig'} }, function(err, keywords){
+        console.log(keywords);
+        if(err){
+            res.send(404);
+        }
+        res.json(keywords);
+    });
+
+
+});
 
 app.get('/getRecommendation', function(req, res){
 
