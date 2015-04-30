@@ -24,12 +24,11 @@ var MovieSchema = new Schema({
     backdrop_path: {
         type: String
     },
-    genres: [
-        {
-            type: String
-        }
-    ],
-    tmdb_id: {
+    genres: [{
+        type: Schema.Types.ObjectId,
+        ref: 'Genre'
+    }],
+    id: {
         type: Number
     },
     imdb_id: {
@@ -39,14 +38,17 @@ var MovieSchema = new Schema({
         type: String
     },
 
-    title: {
+    original_title: {
+        type: String
+    },
+    poster_path: {
         type: String
     },
     overview: {
         type: String
     },
-    poster_path: {
-        type: String
+    popularity: {
+        type: Number
     },
     release_date: {
         type: Date
@@ -57,7 +59,13 @@ var MovieSchema = new Schema({
     tagline: {
         type: String
     },
-    tmdb_rating: {
+    title:{
+        type: String
+    },
+    vote_average:{
+        type: Number
+    },
+    vote_count:{
         type: Number
     },
     imdb_rating: {

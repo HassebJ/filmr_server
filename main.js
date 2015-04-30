@@ -17,7 +17,7 @@ var Genre = Promise.promisifyAll(mongoose.model('Genre'));
 var Movie = mongoose.model('Movie');
 var Keyword = mongoose.model('Keyword');
 //var Genre = mongoose.model('Genre');
-var tmdb = Promise.promisifyAll(require('moviedb')('ac16918a1af4a39ca7b490be17f2ea78'));
+var tmdb = Promise.promisifyAll(require('moviedb')(['ac16918a1af4a39ca7b490be17f2ea78', '9dae15b604f445963788ff49473649ed']));
 var mongodb = mongoose.connect('mongodb://localhost/moviedb');
 var app = express();
 
