@@ -12,10 +12,12 @@ var Promise = require ('bluebird');
 require('./models/movies');
 require('./models/genres');
 require('./models/keywords');
+require('./models/actors');
 var mongoose = require('mongoose');
 var Genre = Promise.promisifyAll(mongoose.model('Genre'));
 var Movie = mongoose.model('Movie');
 var Keyword = mongoose.model('Keyword');
+var Actor = mongoose.model('Actor');
 //var Genre = mongoose.model('Genre');
 var tmdb = Promise.promisifyAll(require('moviedb')(['ac16918a1af4a39ca7b490be17f2ea78', '9dae15b604f445963788ff49473649ed']));
 var mongodb = mongoose.connect('mongodb://localhost/moviedb');
@@ -138,8 +140,15 @@ function getKeywordsId(keywords){
 app.get('/autocompleteKeywords', function(req, res){
 //    var regex = req.query.regex;
     var regex = '(\\b'+ req.query.regex + ')\\w*';
+    var fields ="-_id -__v";
     console.log(regex);
-    Keyword.find({name: {$regex : regex, $options: 'ig'} }, function(err, keywords){
+    Keyword.find({name: {$regex : regex, $options: 'ig'} },fields,{
+            skip: 0,
+            limit: 10,
+            sort: {
+                id:1
+            }
+        }, function(err, keywords){
         console.log(keywords);
         if(err){
             res.send(404);
@@ -150,11 +159,41 @@ app.get('/autocompleteKeywords', function(req, res){
 
 });
 
+app.get('/autocompleteActors', function(req, res){
+//    var regex = req.query.regex;
+    var regex = '(\\b'+ req.query.regex + ')\\w*';
+    var fields ="-_id -__v";
+    console.log(regex);
+    Actor.find({name: {$regex : regex, $options: 'ig'} },fields,{
+            skip: 0,
+            limit: 10,
+            sort: {
+                popularity:-1,
+                id:1
+            }
+        }, function(err, actors){
+        console.log(actors);
+        if(err){
+            res.send(404);
+        }
+        res.json(actors);
+    });
+
+
+});
+
 app.get('/autocompleteGenres', function(req, res){
 //    var regex = req.query.regex;
     var regex = '(\\b'+ req.query.regex + ')\\w*';
+    var fields ="-_id -__v";
     console.log(regex);
-    Genre.find({name: {$regex : regex, $options: 'ig'} }, function(err, keywords){
+    Genre.find({name: {$regex : regex, $options: 'ig'} } ,fields,{
+            skip: 0,
+            limit: 10,
+            sort: {
+                id:1
+            }
+        }, function(err, keywords){
         console.log(keywords);
         if(err){
             res.send(404);
