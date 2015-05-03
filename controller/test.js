@@ -8,3 +8,4 @@ for (var i = 0; i<str.length; i++) {
         charPairs.push(str[i] + str[j]);
     }
 }
+console.log(charPairs);

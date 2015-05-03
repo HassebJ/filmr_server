@@ -27,7 +27,41 @@ function charPairs(){
 var getActors = function() {
 //app.get('/getKeywords',function(req, res){
     var total = 0;
-    async.eachSeries(charPairs(), function (char, eachcallback) {
+    async.eachSeries(['yq',
+        'yr',
+        'ys',
+        'yt',
+        'yu',
+        'yv',
+        'yw',
+        'yx',
+        'yy',
+        'yz',
+        'za',
+        'zb',
+        'zc',
+        'zd',
+        'zf',
+        'zg',
+        'zh',
+        'zi',
+        'zj',
+        'zk',
+        'zl',
+        'zm',
+        'zn',
+        'zo',
+        'zp',
+        'zq',
+        'zr',
+        'zs',
+        'zt',
+        'zu',
+        'zv',
+        'zw',
+        'zx',
+        'zy',
+        'zz' ], function (char, eachcallback) {
         var outer_error;
         async.doUntil(
             function (outerdountilcallback) {
