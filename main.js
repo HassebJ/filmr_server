@@ -153,7 +153,9 @@ app.get('/autocompleteKeywords', function(req, res){
         if(err){
             res.send(404);
         }
-        res.json(keywords);
+        var response = {};
+        response.results = keywords;
+        res.json(response);
     });
 
 
@@ -172,11 +174,13 @@ app.get('/autocompleteActors', function(req, res){
                 id:1
             }
         }, function(err, actors){
-        console.log(actors);
+//        console.log(actors);
         if(err){
             res.send(404);
         }
-        res.json(actors);
+        var response = {};
+        response.results = actors;
+        res.json(response);
     });
 
 
@@ -193,13 +197,31 @@ app.get('/autocompleteGenres', function(req, res){
             sort: {
                 id:1
             }
-        }, function(err, keywords){
-        console.log(keywords);
+        }, function(err, genres){
+//        console.log(keywords);
         if(err){
             res.send(404);
         }
-        res.json(keywords);
+        var response = {};
+        response.results = genres;
+        res.json(response);
     });
+
+
+});
+
+app.get('/fetchRecommendation', function(req, res){
+    console.log("release_date.gte:"+ req.query.era_start + " release_date.lte :" +  req.query.era_end+ " with_people:" + req.query.actors + " with_genres:" + req.query.genres + "with_keyword:" + req.query.keywords);
+    tmdb.discoverMovie({"release_date.gte": req.query.era_start, "release_date.lte": req.query.era_end, "with_people":req.query.actors, "with_genres":req.query.genres, "with_keyword":req.query.keywords}, function(err, resp){
+//                    tmdb.movieInfo({id: resp.results[0].id}, function(err, movieInfo){
+//                        console.log(movieInfo);
+//                        movieInfo.poster_path = 'http://image.tmdb.org/t/p/original'+movieInfo.poster_path;
+//                        res.json(movieInfo);
+//                    });
+        res.json(resp);
+
+    });
+
 
 
 });
