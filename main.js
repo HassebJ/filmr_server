@@ -210,6 +210,15 @@ app.get('/autocompleteGenres', function(req, res){
 
 });
 
+app.get('/getMovie', function(req, res){
+        tmdb.movieInfo({id: req.query.id}, function(err, movieInfo){
+        console.log(movieInfo);
+//        movieInfo.poster_path = 'http://image.tmdb.org/t/p/original'+movieInfo.poster_path;
+        res.json(movieInfo);
+    });
+
+
+});
 app.get('/fetchRecommendation', function(req, res){
     console.log("release_date.gte:"+ req.query.era_start + " release_date.lte :" +  req.query.era_end+ " with_people:" + req.query.actors + " with_genres:" + req.query.genres + "with_keyword:" + req.query.keywords);
     tmdb.discoverMovie({"release_date.gte": req.query.era_start, "release_date.lte": req.query.era_end, "with_people":req.query.actors, "with_genres":req.query.genres, "with_keyword":req.query.keywords}, function(err, resp){
