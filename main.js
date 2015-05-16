@@ -138,21 +138,32 @@ function getKeywordsId(keywords){
 }
 
 app.get('/autocompleteKeywords', function(req, res){
-//    var regex = req.query.regex;
-    var regex = '(\\b'+ req.query.regex + ')\\w*';
-    var fields ="-_id -__v";
-    console.log(regex);
-    Keyword.find({name: {$regex : regex, $options: 'ig'} },fields,{
+    var regex ;
+    var options;
+
+    if(req.query.regex ===""){
+        regex = '';
+        options = {};
+    }
+    else{
+        regex = '(\\b'+ req.query.regex + ')\\w*';
+        options = {
             skip: 0,
             limit: 10,
             sort: {
                 id:1
             }
-        }, function(err, keywords){
+        };
+    }
+
+    var fields ="-_id -__v";
+    console.log(regex);
+    Keyword.find({name: {$regex : regex, $options: 'ig'} },fields,options, function(err, keywords){
         console.log(keywords);
         if(err){
             res.send(404);
         }
+        console.log(keywords.length);
         var response = {};
         response.results = keywords;
         res.json(response);
@@ -187,25 +198,38 @@ app.get('/autocompleteActors', function(req, res){
 });
 
 app.get('/autocompleteGenres', function(req, res){
-//    var regex = req.query.regex;
-    var regex = '(\\b'+ req.query.regex + ')\\w*';
     var fields ="-_id -__v";
-    console.log(regex);
-    Genre.find({name: {$regex : regex, $options: 'ig'} } ,fields,{
+    if(req.query.regex === ""){
+        Genre.find({} ,fields, function(err, genres){
+            if(err){
+                res.send(404);
+            }
+            var response = {};
+            response.results = genres;
+            res.json(response);
+        });
+
+
+    }else{
+        var regex = '(\\b'+ req.query.regex + ')\\w*';
+        Genre.find({name: {$regex : regex, $options: 'ig'} } ,fields,{
             skip: 0,
             limit: 10,
             sort: {
                 id:1
             }
         }, function(err, genres){
-//        console.log(keywords);
-        if(err){
-            res.send(404);
-        }
-        var response = {};
-        response.results = genres;
-        res.json(response);
-    });
+            if(err){
+                res.send(404);
+            }
+            var response = {};
+            response.results = genres;
+            res.json(response);
+        });
+
+        console.log(regex);
+    }
+
 
 
 });
