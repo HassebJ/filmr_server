@@ -235,10 +235,22 @@ app.get('/autocompleteGenres', function(req, res){
 });
 
 app.get('/getMovie', function(req, res){
-        tmdb.movieInfo({id: req.query.id}, function(err, movieInfo){
-        console.log(movieInfo);
-//        movieInfo.poster_path = 'http://image.tmdb.org/t/p/original'+movieInfo.poster_path;
-        res.json(movieInfo);
+//        tmdb.movieInfo({id: req.query.id}, function(err, movieInfo){
+//        console.log(movieInfo);
+////        movieInfo.poster_path = 'http://image.tmdb.org/t/p/original'+movieInfo.poster_path;
+//        res.json(movieInfo);
+//    });
+
+    request({
+        method: 'GET',
+        url: 'http://api.themoviedb.org/3/movie/'+req.query.id+'?api_key=ac16918a1af4a39ca7b490be17f2ea78&append_to_response=keywords,reviews,videos,similar',
+        headers: {
+            'Accept': 'application/json'
+        }}, function (error, response, data) {
+//                console.log('Response:', response);
+
+        res.json(JSON.parse(data));
+
     });
 
 
@@ -251,6 +263,10 @@ app.get('/fetchRecommendation', function(req, res){
 //                        movieInfo.poster_path = 'http://image.tmdb.org/t/p/original'+movieInfo.poster_path;
 //                        res.json(movieInfo);
 //                    });
+    // console.log(resp);
+//    resp.results.splice(0,1);
+    // console.log("<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>");
+    // console.log(resp);
         res.json(resp);
 
     });
@@ -315,6 +331,8 @@ app.get('/getRecommendation', function(req, res){
 //                        movieInfo.poster_path = 'http://image.tmdb.org/t/p/original'+movieInfo.poster_path;
 //                        res.json(movieInfo);
 //                    });
+//                resp.results.splice(0,1);
+                console.log("spliced");
                     res.json(resp);
 
                 });
