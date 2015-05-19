@@ -246,10 +246,18 @@ app.get('/getMovie', function(req, res){
         url: 'http://api.themoviedb.org/3/movie/'+req.query.id+'?api_key=ac16918a1af4a39ca7b490be17f2ea78&append_to_response=keywords,reviews,videos,similar',
         headers: {
             'Accept': 'application/json'
-        }}, function (error, response, data) {
+        }}, function (error, resp, data) {
 //                console.log('Response:', response);
+        var movie = JSON.parse(data);
+        if (movie.poster_path === null ){
+            movie.poster_path = "http://s3.amazonaws.com/hassebj/placeholder.gif";
+            movie.backdrop_path = "http://s3.amazonaws.com/hassebj/placeholder.gif";
+        }
+        var response = {};
+        response.results = movie;
+        res.json(response);
+//        res.json(movie);
 
-        res.json(JSON.parse(data));
 
     });
 
@@ -267,6 +275,12 @@ app.get('/fetchRecommendation', function(req, res){
 //    resp.results.splice(0,1);
     // console.log("<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>");
     // console.log(resp);
+        resp.results.forEach(function(movie){
+            if (movie.poster_path === null ){
+                movie.poster_path = "http://s3.amazonaws.com/hassebj/placeholder.gif";
+                movie.backdrop_path = "http://s3.amazonaws.com/hassebj/placeholder.gif";
+            }
+        });
         res.json(resp);
 
     });
