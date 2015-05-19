@@ -254,7 +254,9 @@ app.get('/getMovie', function(req, res){
             movie.backdrop_path = "http://s3.amazonaws.com/hassebj/placeholder.gif";
         }
         var response = {};
-        response.results = movie;
+        var arr  = [];
+        arr.push(movie);
+        response.results = arr;
         res.json(response);
 //        res.json(movie);
 
